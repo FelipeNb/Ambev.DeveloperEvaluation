@@ -1,11 +1,11 @@
 using Ambev.DeveloperEvaluation.Domain.Enums;
 
-namespace Ambev.DeveloperEvaluation.Application.Users.GetUser;
+namespace Ambev.DeveloperEvaluation.Application.Users.UpdateUser;
 
 /// <summary>
-/// Response model for GetUser operation
+/// Response model for UpdateUser operation
 /// </summary>
-public class GetUserResult
+public class UpdateUserResult
 {
     /// <summary>
     /// The unique identifier of the user
@@ -13,67 +13,67 @@ public class GetUserResult
     public Guid Id { get; set; }
 
     /// <summary>
-    /// The user's full name
+    /// Gets or sets the username of the updated user.
     /// </summary>
     public string Username { get; set; } = string.Empty;
 
     /// <summary>
-    /// The user's email address
+    /// Gets or sets the email address of the updated user.
     /// </summary>
     public string Email { get; set; } = string.Empty;
 
     /// <summary>
-    /// The user's phone number
+    /// Gets or sets the phone number of the updated user.
     /// </summary>
-    public string Phone { get; set; } = string.Empty;   
+    public string Phone { get; set; } = string.Empty;
 
     /// <summary>
-    /// The user's role in the system
+    /// Gets or sets the role of the updated user.
     /// </summary>
     public UserRole Role { get; set; }
 
     /// <summary>
-    /// The current status of the user
+    /// Gets or sets the status of the updated user.
     /// </summary>
     public UserStatus Status { get; set; }
 
     /// <summary>
-    /// The user's first name
+    /// Gets or sets the first name of the updated user.
     /// </summary>
     public string FirstName { get; set; } = string.Empty;
 
     /// <summary>
-    /// The user's last name
+    /// Gets or sets the last name of the updated user.
     /// </summary>
     public string LastName { get; set; } = string.Empty;
 
     /// <summary>
-    /// The city where the user lives
+    /// Gets or sets the city where the updated user lives.
     /// </summary>
     public string City { get; set; } = string.Empty;
 
     /// <summary>
-    /// The street where the user lives
+    /// Gets or sets the street where the updated user lives.
     /// </summary>
     public string Street { get; set; } = string.Empty;
 
     /// <summary>
-    /// The house/building number
+    /// Gets or sets the house/building number of the updated user.
     /// </summary>
     public int Number { get; set; }
 
     /// <summary>
-    /// The zipcode of the user's address
+    /// Gets or sets the zipcode of the updated user's address.
     /// </summary>
     public string Zipcode { get; set; } = string.Empty;
 
     /// <summary>
-    /// The latitude coordinate of the user's location
+    /// Gets or sets the latitude coordinate of the updated user's location.
     /// </summary>
     public string? Latitude { get; set; }
 
     /// <summary>
-    /// The longitude coordinate of the user's location
+    /// Gets or sets the longitude coordinate of the updated user's location.
     /// </summary>
     public string? Longitude { get; set; }
 }

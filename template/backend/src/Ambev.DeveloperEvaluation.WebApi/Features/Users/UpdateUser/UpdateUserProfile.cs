@@ -1,19 +1,19 @@
+using Ambev.DeveloperEvaluation.Application.Users.UpdateUser;
 using AutoMapper;
-using Ambev.DeveloperEvaluation.Application.Users.CreateUser;
 
-namespace Ambev.DeveloperEvaluation.WebApi.Features.Users.CreateUser;
+namespace Ambev.DeveloperEvaluation.WebApi.Features.Users.UpdateUser;
 
 /// <summary>
-/// Profile for mapping between Application and API CreateUser responses
+/// Profile for mapping GetUser feature requests to commands
 /// </summary>
-public class CreateUserProfile : Profile
+public class UpdateUserProfile : Profile
 {
     /// <summary>
-    /// Initializes the mappings for CreateUser feature
+    /// Initializes the mappings for GetUser feature
     /// </summary>
-    public CreateUserProfile()
+    public UpdateUserProfile()
     {
-        CreateMap<CreateUserRequest, CreateUserCommand>()
+        CreateMap<UpdateUserRequest, UpdateUserCommand>()
             .ForMember(dest => dest.FirstName, opt => opt.MapFrom(src => src.Name.FirstName))
             .ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.Name.LastName))
             .ForMember(dest => dest.City, opt => opt.MapFrom(src => src.Address.City))
@@ -23,21 +23,21 @@ public class CreateUserProfile : Profile
             .ForMember(dest => dest.Latitude, opt => opt.MapFrom(src => src.Address.GeoLocation.Lat))
             .ForMember(dest => dest.Longitude, opt => opt.MapFrom(src => src.Address.GeoLocation.Long));
         
-        CreateMap<CreateUserResult, CreateUserResponse>()
+        CreateMap<UpdateUserResult, UpdateUserResponse>()
             .ForMember(dest => dest.Name, opt => 
-                opt.MapFrom(src => new CreateUserNameResponse
+                opt.MapFrom(src => new UpdateUserNameResponse
                 {
                     FirstName = src.FirstName,
                     LastName = src.LastName
                 }))
             .ForMember(dest => dest.Address, opt => 
-                opt.MapFrom(src => new CreateUserAddressResponse
+                opt.MapFrom(src => new UpdateUserAddressResponse
                 {
                     City = src.City,
                     Street = src.Street,
                     Number = src.Number,
                     Zipcode = src.Zipcode,
-                    GeoLocation = new CreateUserGeoLocationResponse
+                    GeoLocation = new UpdateUserGeoLocationResponse
                     {
                         Lat = src.Latitude,
                         Long = src.Longitude

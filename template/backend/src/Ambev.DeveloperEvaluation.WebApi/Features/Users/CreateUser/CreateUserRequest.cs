@@ -2,38 +2,95 @@
 
 namespace Ambev.DeveloperEvaluation.WebApi.Features.Users.CreateUser;
 
+public class CreateUserNameRequest
+{
+    /// <summary>
+    /// The user's first name
+    /// </summary>
+    public string FirstName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The user's last name
+    /// </summary>
+    public string LastName { get; set; } = string.Empty;
+}
+
+public class CreateUserGeoLocationRequest
+{
+    /// <summary>
+    /// The latitude coordinate of the user's location
+    /// </summary>
+    public string? Lat { get; set; }
+
+    /// <summary>
+    /// The longitude coordinate of the user's location
+    /// </summary>
+    public string? Long { get; set; }
+}
+
+public class CreateUserAddressRequest
+{
+    /// <summary>
+    /// The city where the user lives
+    /// </summary>
+    public string City { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The street where the user lives
+    /// </summary>
+    public string Street { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The house/building number
+    /// </summary>
+    public int Number { get; set; }
+
+    /// <summary>
+    /// The zipcode of the user's address
+    /// </summary>
+    public string Zipcode { get; set; } = string.Empty;
+    public CreateUserGeoLocationRequest GeoLocation { get; set; } = new ();
+
+   
+}
+
 /// <summary>
-/// Represents a request to create a new user in the system.
+/// API response model for CreateUser operation
 /// </summary>
 public class CreateUserRequest
 {
     /// <summary>
-    /// Gets or sets the username. Must be unique and contain only valid characters.
+    /// The unique identifier of the user
     /// </summary>
-    public string Username { get; set; } = string.Empty;
+    public Guid Id { get; set; }
 
     /// <summary>
-    /// Gets or sets the password. Must meet security requirements.
+    /// The user's full name
     /// </summary>
+    public string Username { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
 
     /// <summary>
-    /// Gets or sets the phone number in format (XX) XXXXX-XXXX.
+    /// The user's email address
+    /// </summary>
+    public string Email { get; set; } = string.Empty;
+
+    public CreateUserNameRequest Name { get; set; } = new();
+    public CreateUserAddressRequest Address { get; set; } = new();
+
+    /// <summary>
+    /// The user's phone number
     /// </summary>
     public string Phone { get; set; } = string.Empty;
 
     /// <summary>
-    /// Gets or sets the email address. Must be a valid email format.
-    /// </summary>
-    public string Email { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Gets or sets the initial status of the user account.
-    /// </summary>
-    public UserStatus Status { get; set; }
-
-    /// <summary>
-    /// Gets or sets the role assigned to the user.
+    /// The user's role in the system
     /// </summary>
     public UserRole Role { get; set; }
+
+    /// <summary>
+    /// The current status of the user
+    /// </summary>
+    public UserStatus Status { get; set; }
+    
 }

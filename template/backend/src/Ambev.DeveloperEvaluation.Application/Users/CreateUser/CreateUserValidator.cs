@@ -20,6 +20,14 @@ public class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
     /// - Phone: Must match international format (+X XXXXXXXXXX)
     /// - Status: Cannot be set to Unknown
     /// - Role: Cannot be set to None
+    /// - FirstName: Required, length between 1 and 50 characters
+    /// - LastName: Required, length between 1 and 50 characters
+    /// - City: Required, length between 1 and 100 characters
+    /// - Street: Required, length between 1 and 100 characters
+    /// - Number: Must be greater than 0
+    /// - Zipcode: Required, length between 1 and 20 characters
+    /// - Latitude: Optional, length between 1 and 20 characters if provided
+    /// - Longitude: Optional, length between 1 and 20 characters if provided
     /// </remarks>
     public CreateUserCommandValidator()
     {
@@ -29,5 +37,52 @@ public class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
         RuleFor(user => user.Phone).Matches(@"^\+?[1-9]\d{1,14}$");
         RuleFor(user => user.Status).NotEqual(UserStatus.Unknown);
         RuleFor(user => user.Role).NotEqual(UserRole.None);
+        
+        // Name validation
+        RuleFor(user => user.FirstName)
+            .NotEmpty()
+            .WithMessage("First name is required")
+            .Length(1, 50)
+            .WithMessage("First name must be between 1 and 50 characters");
+            
+        RuleFor(user => user.LastName)
+            .NotEmpty()
+            .WithMessage("Last name is required")
+            .Length(1, 50)
+            .WithMessage("Last name must be between 1 and 50 characters");
+            
+        // Address validation
+        RuleFor(user => user.City)
+            .NotEmpty()
+            .WithMessage("City is required")
+            .Length(1, 100)
+            .WithMessage("City must be between 1 and 100 characters");
+            
+        RuleFor(user => user.Street)
+            .NotEmpty()
+            .WithMessage("Street is required")
+            .Length(1, 100)
+            .WithMessage("Street must be between 1 and 100 characters");
+            
+        RuleFor(user => user.Number)
+            .GreaterThan(0)
+            .WithMessage("Number must be greater than 0");
+            
+        RuleFor(user => user.Zipcode)
+            .NotEmpty()
+            .WithMessage("Zipcode is required")
+            .Length(1, 20)
+            .WithMessage("Zipcode must be between 1 and 20 characters");
+            
+        // Optional coordinates validation
+        RuleFor(user => user.Latitude)
+            .Length(1, 20)
+            .When(user => !string.IsNullOrEmpty(user.Latitude))
+            .WithMessage("Latitude must be between 1 and 20 characters when provided");
+            
+        RuleFor(user => user.Longitude)
+            .Length(1, 20)
+            .When(user => !string.IsNullOrEmpty(user.Longitude))
+            .WithMessage("Longitude must be between 1 and 20 characters when provided");
     }
 }
