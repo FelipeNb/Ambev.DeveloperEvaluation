@@ -1,5 +1,7 @@
-﻿using Ambev.DeveloperEvaluation.Domain.Entities;
+﻿using System.Linq.Expressions;
+using Ambev.DeveloperEvaluation.Domain.Entities;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
+using Ambev.DeveloperEvaluation.ORM.Repositories.Base;
 using Microsoft.EntityFrameworkCore;
 
 namespace Ambev.DeveloperEvaluation.ORM.Repositories;
@@ -7,15 +9,15 @@ namespace Ambev.DeveloperEvaluation.ORM.Repositories;
 /// <summary>
 /// Implementation of IUserRepository using Entity Framework Core
 /// </summary>
-public class UserRepository : IUserRepository
+public class UserRepository : RepositoryBase<User>, IUserRepository
 {
-    private readonly DefaultContext _context;
+    private new readonly DefaultContext _context;
 
     /// <summary>
     /// Initializes a new instance of UserRepository
     /// </summary>
     /// <param name="context">The database context</param>
-    public UserRepository(DefaultContext context)
+    public UserRepository(DefaultContext context) : base(context)
     {
         _context = context;
     }
@@ -42,6 +44,22 @@ public class UserRepository : IUserRepository
     public async Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return await _context.Users.FirstOrDefaultAsync(o=> o.Id == id, cancellationToken);
+    }
+
+    public async Task UpdateAsync(User user, CancellationToken cancellationToken = default)
+    {
+        await _context.Users
+            .Where(x => x.Id == user.Id)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(x => x.Username, user.Username)
+                .SetProperty(x => x.Email, user.Email)
+                .SetProperty(x => x.Phone, user.Phone)
+                .SetProperty(x => x.Password, user.Password)
+                .SetProperty(x => x.Role, user.Role)
+                .SetProperty(x => x.Status, user.Status),
+                cancellationToken: cancellationToken);
+        
+        await _context.SaveChangesAsync(cancellationToken);
     }
 
     /// <summary>
@@ -72,4 +90,11 @@ public class UserRepository : IUserRepository
         await _context.SaveChangesAsync(cancellationToken);
         return true;
     }
+
+    public async Task<User?> GetByUsernameAsync(string commandUsername, CancellationToken cancellationToken)
+    {
+        return await _context.Users
+            .FirstOrDefaultAsync(u => u.Username == commandUsername, cancellationToken);
+    }
+
 }

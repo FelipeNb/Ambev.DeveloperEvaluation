@@ -1,25 +1,24 @@
-﻿using Ambev.DeveloperEvaluation.Common.Validation;
+using Ambev.DeveloperEvaluation.Common.Validation;
 using Ambev.DeveloperEvaluation.Domain.Enums;
 using MediatR;
 
-namespace Ambev.DeveloperEvaluation.Application.Users.CreateUser;
+namespace Ambev.DeveloperEvaluation.Application.Users.UpdateUser;
 
 /// <summary>
-/// Command for creating a new user.
+/// Command for updating a user by their ID
 /// </summary>
-/// <remarks>
-/// This command is used to capture the required data for creating a user, 
-/// including username, password, phone number, email, status, role, and address information. 
-/// It implements <see cref="IRequest{TResponse}"/> to initiate the request 
-/// that returns a <see cref="CreateUserResult"/>.
-/// 
-/// The data provided in this command is validated using the 
-/// <see cref="CreateUserCommandValidator"/> which extends 
-/// <see cref="AbstractValidator{T}"/> to ensure that the fields are correctly 
-/// populated and follow the required rules.
-/// </remarks>
-public class CreateUserCommand : IRequest<CreateUserResult>
+public record UpdateUserCommand : IRequest<UpdateUserResult>
 {
+    public UpdateUserCommand(Guid id)
+    {
+        Id = id;
+    }
+
+    /// <summary>
+    /// The unique identifier of the user to retrieve
+    /// </summary>
+    public Guid Id { get; }
+
     /// <summary>
     /// Gets or sets the username of the user to be created.
     /// </summary>
@@ -92,7 +91,7 @@ public class CreateUserCommand : IRequest<CreateUserResult>
 
     public ValidationResultDetail Validate()
     {
-        var validator = new CreateUserCommandValidator();
+        var validator = new UpdateUserValidator();
         var result = validator.Validate(this);
         return new ValidationResultDetail
         {

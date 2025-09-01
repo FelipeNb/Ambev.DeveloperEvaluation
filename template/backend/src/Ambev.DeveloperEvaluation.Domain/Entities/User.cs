@@ -51,6 +51,46 @@ public class User : BaseEntity, IUser
     public UserStatus Status { get; set; }
 
     /// <summary>
+    /// Gets the user's first name.
+    /// </summary>
+    public string FirstName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets the user's last name.
+    /// </summary>
+    public string LastName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets the city where the user lives.
+    /// </summary>
+    public string City { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets the street where the user lives.
+    /// </summary>
+    public string Street { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets the house/building number.
+    /// </summary>
+    public int Number { get; set; }
+
+    /// <summary>
+    /// Gets the zipcode of the user's address.
+    /// </summary>
+    public string Zipcode { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets the latitude coordinate of the user's location.
+    /// </summary>
+    public string? Latitude { get; set; }
+
+    /// <summary>
+    /// Gets the longitude coordinate of the user's location.
+    /// </summary>
+    public string? Longitude { get; set; }
+
+    /// <summary>
     /// Gets the date and time when the user was created.
     /// </summary>
     public DateTime CreatedAt { get; set; }
@@ -103,6 +143,7 @@ public class User : BaseEntity, IUser
     /// <list type="bullet">Phone number format</list>
     /// <list type="bullet">Password complexity requirements</list>
     /// <list type="bullet">Role validity</list>
+    /// <list type="bullet">Name and address information</list>
     /// 
     /// </remarks>
     public ValidationResultDetail Validate()

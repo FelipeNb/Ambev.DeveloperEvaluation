@@ -14,5 +14,7 @@ public class GetUserProfile : Profile
     public GetUserProfile()
     {
         CreateMap<User, GetUserResult>();
+        
+        
     }
 }

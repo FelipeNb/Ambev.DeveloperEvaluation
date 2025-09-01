@@ -1,8 +1,8 @@
 using Ambev.DeveloperEvaluation.Domain.Enums;
 
-namespace Ambev.DeveloperEvaluation.WebApi.Features.Users.GetUser;
+namespace Ambev.DeveloperEvaluation.WebApi.Features.Users.UpdateUser;
 
-public class GetUserNameResponse
+public class UpdateUserNameRequest
 {
     /// <summary>
     /// The user's first name
@@ -15,7 +15,7 @@ public class GetUserNameResponse
     public string LastName { get; set; } = string.Empty;
 }
 
-public class GetUserGeoLocationResponse
+public class UpdateUserGeoLocationRequest
 {
     /// <summary>
     /// The latitude coordinate of the user's location
@@ -28,7 +28,7 @@ public class GetUserGeoLocationResponse
     public string? Long { get; set; }
 }
 
-public class GetUserAddressResponse
+public class UpdateUserAddressRequest
 {
     /// <summary>
     /// The city where the user lives
@@ -49,15 +49,15 @@ public class GetUserAddressResponse
     /// The zipcode of the user's address
     /// </summary>
     public string Zipcode { get; set; } = string.Empty;
-    public GetUserGeoLocationResponse GeoLocation { get; set; } = new ();
+    public UpdateUserGeoLocationRequest GeoLocation { get; set; } = new ();
 
    
 }
 
 /// <summary>
-/// API response model for GetUser operation
+/// API response model for UpdateUser operation
 /// </summary>
-public class GetUserResponse
+public class UpdateUserRequest
 {
     /// <summary>
     /// The unique identifier of the user
@@ -75,8 +75,8 @@ public class GetUserResponse
     /// </summary>
     public string Email { get; set; } = string.Empty;
 
-    public GetUserNameResponse Name { get; set; } = new();
-    public GetUserAddressResponse Address { get; set; } = new();
+    public UpdateUserNameRequest Name { get; set; } = new();
+    public UpdateUserAddressRequest Address { get; set; } = new();
 
     /// <summary>
     /// The user's phone number
