@@ -16,18 +16,25 @@ public class CartProductConfiguration : IEntityTypeConfiguration<CartProduct>
         builder.Property(cp => cp.CartId).IsRequired();
         builder.Property(cp => cp.ProductId).IsRequired();
         builder.Property(cp => cp.Quantity).IsRequired();
+        
+        builder.Property(cp => cp.UnitPrice).IsRequired().HasColumnType("decimal(18,2)");
+        builder.Property(cp => cp.DiscountPercent).HasColumnType("decimal(18,2)");
+        builder.Property(cp => cp.Total).HasColumnType("decimal(18,2)");
 
+        
         // Foreign key relationships
         builder.HasOne(cp => cp.Cart)
-            .WithMany(c => c.CartProducts)
+            .WithMany(c => c.Items)
             .HasForeignKey(cp => cp.CartId)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(cp => cp.Product)
             .WithMany(p => p.CartProducts)
             .HasForeignKey(cp => cp.ProductId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Restrict);
 
+        builder.HasIndex(cp => cp.ProductId);
+        
         // Unique constraint to prevent duplicate products in the same cart
         builder.HasIndex(cp => new { cp.CartId, cp.ProductId })
             .IsUnique()
@@ -35,6 +42,7 @@ public class CartProductConfiguration : IEntityTypeConfiguration<CartProduct>
 
         // Constraints
         builder.HasCheckConstraint("CK_CartProducts_Quantity", "Quantity > 0");
+        builder.HasCheckConstraint("CK_CartProducts_Quantity_Max", "Quantity <= 20");
 
         // Indexes
         builder.HasIndex(cp => cp.CartId).HasDatabaseName("idx_cart_products_cart_id");
