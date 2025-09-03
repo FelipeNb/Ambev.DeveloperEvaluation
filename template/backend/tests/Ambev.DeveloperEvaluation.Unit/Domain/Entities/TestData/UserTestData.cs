@@ -20,6 +20,7 @@ public static class UserTestData
     /// - Phone (Brazilian format)
     /// - Status (Active or Suspended)
     /// - Role (Customer or Admin)
+    /// - Name and address information
     /// </summary>
     private static readonly Faker<User> UserFaker = new Faker<User>()
         .RuleFor(u => u.Username, f => f.Internet.UserName())
@@ -27,7 +28,15 @@ public static class UserTestData
         .RuleFor(u => u.Email, f => f.Internet.Email())
         .RuleFor(u => u.Phone, f => $"+55{f.Random.Number(11, 99)}{f.Random.Number(100000000, 999999999)}")
         .RuleFor(u => u.Status, f => f.PickRandom(UserStatus.Active, UserStatus.Suspended))
-        .RuleFor(u => u.Role, f => f.PickRandom(UserRole.Customer, UserRole.Admin));
+        .RuleFor(u => u.Role, f => f.PickRandom(UserRole.Customer, UserRole.Admin))
+        .RuleFor(u => u.FirstName, f => f.Name.FirstName())
+        .RuleFor(u => u.LastName, f => f.Name.LastName())
+        .RuleFor(u => u.City, f => f.Address.City())
+        .RuleFor(u => u.Street, f => f.Address.StreetName())
+        .RuleFor(u => u.Number, f => f.Random.Number(1, 9999))
+        .RuleFor(u => u.Zipcode, f => f.Address.ZipCode("#####-###"))
+        .RuleFor(u => u.Latitude, f => f.Random.Bool() ? f.Address.Latitude().ToString("F4") : null)
+        .RuleFor(u => u.Longitude, f => f.Random.Bool() ? f.Address.Longitude().ToString("F4") : null);
 
     /// <summary>
     /// Generates a valid User entity with randomized data.
@@ -97,6 +106,102 @@ public static class UserTestData
     }
 
     /// <summary>
+    /// Generates a valid first name.
+    /// The generated first name will:
+    /// - Be between 1 and 50 characters
+    /// - Use realistic first names
+    /// </summary>
+    /// <returns>A valid first name.</returns>
+    public static string GenerateValidFirstName()
+    {
+        return new Faker().Name.FirstName();
+    }
+
+    /// <summary>
+    /// Generates a valid last name.
+    /// The generated last name will:
+    /// - Be between 1 and 50 characters
+    /// - Use realistic last names
+    /// </summary>
+    /// <returns>A valid last name.</returns>
+    public static string GenerateValidLastName()
+    {
+        return new Faker().Name.LastName();
+    }
+
+    /// <summary>
+    /// Generates a valid city name.
+    /// The generated city will:
+    /// - Be between 1 and 100 characters
+    /// - Use realistic city names
+    /// </summary>
+    /// <returns>A valid city name.</returns>
+    public static string GenerateValidCity()
+    {
+        return new Faker().Address.City();
+    }
+
+    /// <summary>
+    /// Generates a valid street name.
+    /// The generated street will:
+    /// - Be between 1 and 100 characters
+    /// - Use realistic street names
+    /// </summary>
+    /// <returns>A valid street name.</returns>
+    public static string GenerateValidStreet()
+    {
+        return new Faker().Address.StreetName();
+    }
+
+    /// <summary>
+    /// Generates a valid house/building number.
+    /// The generated number will:
+    /// - Be greater than 0
+    /// - Be a realistic house number
+    /// </summary>
+    /// <returns>A valid house/building number.</returns>
+    public static int GenerateValidNumber()
+    {
+        return new Faker().Random.Number(1, 9999);
+    }
+
+    /// <summary>
+    /// Generates a valid zipcode.
+    /// The generated zipcode will:
+    /// - Be between 1 and 20 characters
+    /// - Follow Brazilian zipcode format
+    /// </summary>
+    /// <returns>A valid zipcode.</returns>
+    public static string GenerateValidZipcode()
+    {
+        return new Faker().Address.ZipCode("#####-###");
+    }
+
+    /// <summary>
+    /// Generates a valid latitude coordinate.
+    /// The generated latitude will:
+    /// - Be between 1 and 20 characters
+    /// - Be a realistic latitude value
+    /// </summary>
+    /// <returns>A valid latitude coordinate.</returns>
+    public static string GenerateValidLatitude()
+    {
+        return new Faker().Address.Latitude().ToString("F4");
+    }
+
+    /// <summary>
+    /// Generates a valid longitude coordinate.
+    /// The generated longitude will:
+    /// - Be between 1 and 20 characters
+    /// - Be a realistic longitude value
+    /// </summary>
+    /// <returns>A valid longitude coordinate.</returns>
+    public static string GenerateValidLongitude()
+    {
+        return new Faker().Address.Longitude().ToString("F4");
+    }
+
+    /// <summary>
     /// Generates an invalid email address for testing negative scenarios.
     /// The generated email will:
     /// - Not follow the standard email format
@@ -149,5 +254,65 @@ public static class UserTestData
     public static string GenerateLongUsername()
     {
         return new Faker().Random.String2(51);
+    }
+
+    /// <summary>
+    /// Generates an invalid first name for testing negative scenarios.
+    /// The generated first name will be empty.
+    /// </summary>
+    /// <returns>An invalid first name.</returns>
+    public static string GenerateInvalidFirstName()
+    {
+        return "";
+    }
+
+    /// <summary>
+    /// Generates an invalid last name for testing negative scenarios.
+    /// The generated last name will be empty.
+    /// </summary>
+    /// <returns>An invalid last name.</returns>
+    public static string GenerateInvalidLastName()
+    {
+        return "";
+    }
+
+    /// <summary>
+    /// Generates an invalid city for testing negative scenarios.
+    /// The generated city will be empty.
+    /// </summary>
+    /// <returns>An invalid city.</returns>
+    public static string GenerateInvalidCity()
+    {
+        return "";
+    }
+
+    /// <summary>
+    /// Generates an invalid street for testing negative scenarios.
+    /// The generated street will be empty.
+    /// </summary>
+    /// <returns>An invalid street.</returns>
+    public static string GenerateInvalidStreet()
+    {
+        return "";
+    }
+
+    /// <summary>
+    /// Generates an invalid number for testing negative scenarios.
+    /// The generated number will be 0 or negative.
+    /// </summary>
+    /// <returns>An invalid number.</returns>
+    public static int GenerateInvalidNumber()
+    {
+        return new Faker().Random.Number(-10, 0);
+    }
+
+    /// <summary>
+    /// Generates an invalid zipcode for testing negative scenarios.
+    /// The generated zipcode will be empty.
+    /// </summary>
+    /// <returns>An invalid zipcode.</returns>
+    public static string GenerateInvalidZipcode()
+    {
+        return "";
     }
 }

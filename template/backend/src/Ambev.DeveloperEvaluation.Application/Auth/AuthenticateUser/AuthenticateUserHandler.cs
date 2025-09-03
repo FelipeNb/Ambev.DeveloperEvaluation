@@ -1,5 +1,3 @@
-using System.Threading;
-using System.Threading.Tasks;
 using Ambev.DeveloperEvaluation.Common.Security;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
 using Ambev.DeveloperEvaluation.Domain.Specifications;
@@ -44,7 +42,7 @@ namespace Ambev.DeveloperEvaluation.Application.Auth.AuthenticateUser
             {
                 Token = token,
                 Email = user.Email,
-                Name = user.Username,
+                Username = user.Username,
                 Role = user.Role.ToString()
             };
         }

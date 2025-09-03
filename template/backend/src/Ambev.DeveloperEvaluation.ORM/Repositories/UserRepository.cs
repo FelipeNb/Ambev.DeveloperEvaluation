@@ -97,4 +97,9 @@ public class UserRepository : RepositoryBase<User>, IUserRepository
             .FirstOrDefaultAsync(u => u.Username == commandUsername, cancellationToken);
     }
 
+    public async Task<bool> UserExistsAsync(Guid cartUserId)
+    {
+        return await _context.Users
+            .AnyAsync(u => u.Id == cartUserId);
+    }
 }

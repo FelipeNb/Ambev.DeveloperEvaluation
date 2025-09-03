@@ -20,7 +20,7 @@ public sealed class AuthenticateUserResponse
     /// <summary>
     /// Gets or sets the user's full name
     /// </summary>
-    public string Name { get; set; } = string.Empty;
+    public string Username { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the user's role in the system

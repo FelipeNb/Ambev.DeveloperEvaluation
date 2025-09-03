@@ -48,20 +48,39 @@ public class CreateUserHandlerTests
             Email = command.Email,
             Phone = command.Phone,
             Status = command.Status,
-            Role = command.Role
+            Role = command.Role,
+            FirstName = command.FirstName,
+            LastName = command.LastName,
+            City = command.City,
+            Street = command.Street,
+            Number = command.Number,
+            Zipcode = command.Zipcode,
+            Latitude = command.Latitude,
+            Longitude = command.Longitude
         };
 
         var result = new CreateUserResult
         {
             Id = user.Id,
+            Username = user.Username,
+            Email = user.Email,
+            Phone = user.Phone,
+            Status = user.Status,
+            Role = user.Role,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            City = user.City,
+            Street = user.Street,
+            Number = user.Number,
+            Zipcode = user.Zipcode,
+            Latitude = user.Latitude,
+            Longitude = user.Longitude
         };
-
 
         _mapper.Map<User>(command).Returns(user);
         _mapper.Map<CreateUserResult>(user).Returns(result);
 
-        _userRepository.CreateAsync(Arg.Any<User>(), Arg.Any<CancellationToken>())
-            .Returns(user);
+        _userRepository.CreateAsync(Arg.Any<User>(), Arg.Any<CancellationToken>()).Returns(user);
         _passwordHasher.HashPassword(Arg.Any<string>()).Returns("hashedPassword");
 
         // When
@@ -70,6 +89,19 @@ public class CreateUserHandlerTests
         // Then
         createUserResult.Should().NotBeNull();
         createUserResult.Id.Should().Be(user.Id);
+        createUserResult.Username.Should().Be(user.Username);
+        createUserResult.Email.Should().Be(user.Email);
+        createUserResult.Phone.Should().Be(user.Phone);
+        createUserResult.Status.Should().Be(user.Status);
+        createUserResult.Role.Should().Be(user.Role);
+        createUserResult.FirstName.Should().Be(user.FirstName);
+        createUserResult.LastName.Should().Be(user.LastName);
+        createUserResult.City.Should().Be(user.City);
+        createUserResult.Street.Should().Be(user.Street);
+        createUserResult.Number.Should().Be(user.Number);
+        createUserResult.Zipcode.Should().Be(user.Zipcode);
+        createUserResult.Latitude.Should().Be(user.Latitude);
+        createUserResult.Longitude.Should().Be(user.Longitude);
         await _userRepository.Received(1).CreateAsync(Arg.Any<User>(), Arg.Any<CancellationToken>());
     }
 
@@ -107,7 +139,15 @@ public class CreateUserHandlerTests
             Email = command.Email,
             Phone = command.Phone,
             Status = command.Status,
-            Role = command.Role
+            Role = command.Role,
+            FirstName = command.FirstName,
+            LastName = command.LastName,
+            City = command.City,
+            Street = command.Street,
+            Number = command.Number,
+            Zipcode = command.Zipcode,
+            Latitude = command.Latitude,
+            Longitude = command.Longitude
         };
 
         _mapper.Map<User>(command).Returns(user);
@@ -141,7 +181,15 @@ public class CreateUserHandlerTests
             Email = command.Email,
             Phone = command.Phone,
             Status = command.Status,
-            Role = command.Role
+            Role = command.Role,
+            FirstName = command.FirstName,
+            LastName = command.LastName,
+            City = command.City,
+            Street = command.Street,
+            Number = command.Number,
+            Zipcode = command.Zipcode,
+            Latitude = command.Latitude,
+            Longitude = command.Longitude
         };
 
         _mapper.Map<User>(command).Returns(user);
@@ -158,6 +206,99 @@ public class CreateUserHandlerTests
             c.Email == command.Email &&
             c.Phone == command.Phone &&
             c.Status == command.Status &&
-            c.Role == command.Role));
+            c.Role == command.Role &&
+            c.FirstName == command.FirstName &&
+            c.LastName == command.LastName &&
+            c.City == command.City &&
+            c.Street == command.Street &&
+            c.Number == command.Number &&
+            c.Zipcode == command.Zipcode &&
+            c.Latitude == command.Latitude &&
+            c.Longitude == command.Longitude));
+    }
+
+    /// <summary>
+    /// Tests that a user creation request with null coordinates is handled successfully.
+    /// </summary>
+    [Fact(DisplayName = "Given user data with null coordinates When creating user Then returns success response")]
+    public async Task Handle_ValidRequestWithNullCoordinates_ReturnsSuccessResponse()
+    {
+        // Given
+        var command = CreateUserHandlerTestData.GenerateValidCommand();
+        command.Latitude = null;
+        command.Longitude = null;
+        
+        var user = new User
+        {
+            Id = Guid.NewGuid(),
+            Username = command.Username,
+            Password = command.Password,
+            Email = command.Email,
+            Phone = command.Phone,
+            Status = command.Status,
+            Role = command.Role,
+            FirstName = command.FirstName,
+            LastName = command.LastName,
+            City = command.City,
+            Street = command.Street,
+            Number = command.Number,
+            Zipcode = command.Zipcode,
+            Latitude = null,
+            Longitude = null
+        };
+
+        var result = new CreateUserResult
+        {
+            Id = user.Id,
+            Username = user.Username,
+            Email = user.Email,
+            Phone = user.Phone,
+            Status = user.Status,
+            Role = user.Role,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            City = user.City,
+            Street = user.Street,
+            Number = user.Number,
+            Zipcode = user.Zipcode,
+            Latitude = null,
+            Longitude = null
+        };
+
+        _mapper.Map<User>(command).Returns(user);
+        _mapper.Map<CreateUserResult>(user).Returns(result);
+
+        _userRepository.CreateAsync(Arg.Any<User>(), Arg.Any<CancellationToken>())
+            .Returns(user);
+        _passwordHasher.HashPassword(Arg.Any<string>()).Returns("hashedPassword");
+
+        // When
+        var createUserResult = await _handler.Handle(command, CancellationToken.None);
+
+        // Then
+        createUserResult.Should().NotBeNull();
+        createUserResult.Id.Should().Be(user.Id);
+        createUserResult.Latitude.Should().BeNull();
+        createUserResult.Longitude.Should().BeNull();
+        await _userRepository.Received(1).CreateAsync(Arg.Any<User>(), Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
+    /// Tests that a user creation request with invalid address data throws validation exception.
+    /// </summary>
+    [Fact(DisplayName = "Given invalid address data When creating user Then throws validation exception")]
+    public async Task Handle_InvalidAddressData_ThrowsValidationException()
+    {
+        // Given
+        var command = CreateUserHandlerTestData.GenerateValidCommand();
+        command.FirstName = ""; // Invalid: empty
+        command.City = ""; // Invalid: empty
+        command.Number = 0; // Invalid: must be greater than 0
+
+        // When
+        var act = () => _handler.Handle(command, CancellationToken.None);
+
+        // Then
+        await act.Should().ThrowAsync<FluentValidation.ValidationException>();
     }
 }

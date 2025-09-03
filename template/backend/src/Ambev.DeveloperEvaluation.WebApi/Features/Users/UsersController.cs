@@ -14,6 +14,7 @@ using AutoMapper;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace Ambev.DeveloperEvaluation.WebApi.Features.Users;
 
@@ -26,16 +27,18 @@ public class UsersController : BaseController
 {
     private readonly IMediator _mediator;
     private readonly IMapper _mapper;
+    private readonly ILogger<UsersController> _logger;
 
     /// <summary>
     /// Initializes a new instance of UsersController
     /// </summary>
     /// <param name="mediator">The mediator instance</param>
     /// <param name="mapper">The AutoMapper instance</param>
-    public UsersController(IMediator mediator, IMapper mapper)
+    public UsersController(IMediator mediator, IMapper mapper, ILogger<UsersController> logger)
     {
         _mediator = mediator;
         _mapper = mapper;
+        _logger = logger;
     }
     
     /// <summary>
@@ -50,28 +53,35 @@ public class UsersController : BaseController
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetUser([FromRoute] Guid id, CancellationToken cancellationToken)
     {
+        _logger.LogInformation("[GetUser] Request received: id={Id}", id);
         var request = new GetUserRequest { Id = id };
         var validator = new GetUserRequestValidator();
         var validationResult = await validator.ValidateAsync(request, cancellationToken);
 
         if (!validationResult.IsValid)
         {
+            _logger.LogInformation("[GetUser] Validation failed: {Errors}", validationResult.Errors);
             return BadRequest(validationResult.Errors);
         }
 
         var command = _mapper.Map<GetUserCommand>(request);
         try
         {
-            var response = await _mediator.Send(command, cancellationToken);
-            return Ok(_mapper.Map<GetUserResponse>(response));
+            _logger.LogInformation("[GetUser] Sending command: {@Command}", command);
+            var result = await _mediator.Send(command, cancellationToken);
+            var response = _mapper.Map<GetUserResponse>(result);
+            _logger.LogInformation("[GetUser] Success: id={Id}", id);
+            return Ok(response);
         }
         catch (KeyNotFoundException e)
         {
-            return NotFound(ApiResponse.BuildErrorResponse(e.Message));
+            _logger.LogInformation(e, "[GetUser] NotFound: id={Id} message={Message}", id, e.Message);
+            return NotFound(ApiResponse.BuildErrorResponse("KeyNotFound", "User not found", e.Message));
         }
         catch (InvalidOperationException e)
         {
-            return BadRequest(ApiResponse.BuildErrorResponse(e.Message));
+            _logger.LogInformation(e, "[GetUser] InvalidOperation: id={Id} message={Message}", id, e.Message);
+            return BadRequest(ApiResponse.BuildErrorResponse("InvalidOperation", "", e.Message));
         }
     }
 
@@ -92,7 +102,21 @@ public class UsersController : BaseController
         [FromQuery] string? _order = "username asc,email desc",
         CancellationToken cancellationToken = default)
     {
-        // Mapear para o comando que a aplicação entende
+        _logger.LogInformation("[GetUsers] Request received: page={Page} size={Size} order={Order}", _page, _size, _order);
+        var request = new ListUsersRequest
+        {
+            Page = _page,
+            Size = _size,
+        };
+        var validator = new ListUsersRequestValidator();
+        var validationResult = await validator.ValidateAsync(request, cancellationToken);
+        
+        if (!validationResult.IsValid)
+        {
+            _logger.LogInformation("[GetUsers] Validation failed: {Errors}", validationResult.Errors);
+            return BadRequest(validationResult.Errors);
+        }
+        
         var command = new ListUsersCommand
         {
             Page = _page,
@@ -102,13 +126,16 @@ public class UsersController : BaseController
 
         try
         {
-            // Executa a query via Mediator
+            _logger.LogInformation("[GetUsers] Sending command: {@Command}", command);
             var result = await _mediator.Send(command, cancellationToken);
-            return Ok(_mapper.Map<ListUsersResponse>(result));
+            var response = _mapper.Map<ListUsersResponse>(result);
+            _logger.LogInformation("[GetUsers] Success");
+            return Ok(response);
         }
         catch (ValidationException e)
         {
-            return BadRequest(ApiResponse.BuildErrorResponse(e.Message));
+            _logger.LogInformation(e, "[GetUsers] ValidationException: message={Message}", e.Message);
+            return BadRequest(ApiResponse.BuildErrorResponse("InvalidOperation", "", e.Message));
         }
     }
 
@@ -125,6 +152,7 @@ public class UsersController : BaseController
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateUser([FromBody] CreateUserRequest request, CancellationToken cancellationToken)
     {
+        _logger.LogInformation("[CreateUser] Request received");
         var validator = new CreateUserRequestValidator();
         var validationResult = await validator.ValidateAsync(request, cancellationToken);
 
@@ -134,13 +162,16 @@ public class UsersController : BaseController
         try
         {
             var command = _mapper.Map<CreateUserCommand>(request);
-            var response = await _mediator.Send(command, cancellationToken);
-
-            return Created(string.Empty, _mapper.Map<CreateUserResponse>(response));
+            _logger.LogInformation("[CreateUser] Sending command: {@Command}", command);
+            var result = await _mediator.Send(command, cancellationToken);
+            var response = _mapper.Map<CreateUserResponse>(result);
+            _logger.LogInformation("[CreateUser] Success");
+            return Created(string.Empty, response);
         }
         catch (InvalidOperationException e)
         {
-            return BadRequest(ApiResponse.BuildErrorResponse(e.Message));
+            _logger.LogInformation(e, "[CreateUser] InvalidOperation: message={Message}", e.Message);
+            return BadRequest(ApiResponse.BuildErrorResponse("InvalidOperation", "Field already exists",e.Message));
         }
     }
     
@@ -157,6 +188,7 @@ public class UsersController : BaseController
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteUser([FromRoute] Guid id, CancellationToken cancellationToken)
     {
+        _logger.LogInformation("[DeleteUser] Request received: id={Id}", id);
         var request = new DeleteUserRequest { Id = id };
         var validator = new DeleteUserRequestValidator();
         var validationResult = await validator.ValidateAsync(request, cancellationToken);
@@ -167,6 +199,7 @@ public class UsersController : BaseController
         try
         {
             var command = _mapper.Map<DeleteUserCommand>(request.Id);
+            _logger.LogInformation("[DeleteUser] Sending command: {@Command}", command);
             await _mediator.Send(command, cancellationToken);
 
             return Ok(new ApiResponse
@@ -177,11 +210,13 @@ public class UsersController : BaseController
         }
         catch (KeyNotFoundException e)
         {
-            return NotFound(ApiResponse.BuildErrorResponse(e.Message));
+            _logger.LogInformation(e, "[DeleteUser] NotFound: id={Id} message={Message}", id, e.Message);
+            return NotFound(ApiResponse.BuildErrorResponse("KeyNotFound", "User not found", e.Message));
         }
         catch (InvalidOperationException e)
         {
-            return BadRequest(ApiResponse.BuildErrorResponse(e.Message));
+            _logger.LogInformation(e, "[DeleteUser] InvalidOperation: id={Id} message={Message}", id, e.Message);
+            return BadRequest(ApiResponse.BuildErrorResponse("InvalidOperation", "", e.Message));
         }
     }
 
@@ -197,6 +232,7 @@ public class UsersController : BaseController
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateUser([FromRoute] Guid id, [FromBody] UpdateUserRequest request, CancellationToken cancellationToken)
     {
+        _logger.LogInformation("[UpdateUser] Request received: id={Id}", id);
         request.Id = id;
         var validator = new UpdateUserRequestValidator();
         var validationResult = await validator.ValidateAsync(request, cancellationToken);
@@ -207,16 +243,21 @@ public class UsersController : BaseController
         try
         {
             var command = _mapper.Map<UpdateUserCommand>(request);
-            var response = await _mediator.Send(command, cancellationToken);
-            return Ok(_mapper.Map<UpdateUserResponse>(response));
+            _logger.LogInformation("[UpdateUser] Sending command: {@Command}", command);
+            var result = await _mediator.Send(command, cancellationToken);
+            var response = _mapper.Map<UpdateUserResponse>(result);
+            _logger.LogInformation("[UpdateUser] Success: id={Id}", id);
+            return Ok(response);
         }
         catch (KeyNotFoundException e)
         {
-            return NotFound(ApiResponse.BuildErrorResponse(e.Message));
+            _logger.LogInformation(e, "[UpdateUser] NotFound: id={Id} message={Message}", id, e.Message);
+            return NotFound(ApiResponse.BuildErrorResponse("KeyNotFound", "User not found", e.Message));
         }
         catch (InvalidOperationException e)
         {
-            return BadRequest(ApiResponse.BuildErrorResponse(e.Message));
+            _logger.LogInformation(e, "[UpdateUser] InvalidOperation: id={Id} message={Message}", id, e.Message);
+            return BadRequest(ApiResponse.BuildErrorResponse("InvalidOperation", "Field already exists",e.Message));
         }
     }
 

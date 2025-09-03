@@ -43,4 +43,5 @@ public interface IUserRepository
 
     Task<User?> GetByUsernameAsync(string commandUsername, CancellationToken cancellationToken);
     Task<PagedResult<User>> GetAllAsync(int requestPage, int requestSize, string? requestOrder, CancellationToken cancellationToken);
+    Task<bool> UserExistsAsync(Guid cartUserId);
 }

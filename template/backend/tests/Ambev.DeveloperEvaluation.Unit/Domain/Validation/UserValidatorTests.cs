@@ -9,7 +9,7 @@ namespace Ambev.DeveloperEvaluation.Unit.Domain.Validation;
 /// <summary>
 /// Contains unit tests for the UserValidator class.
 /// Tests cover validation of all user properties including username, email,
-/// password, phone, status, and role requirements.
+/// password, phone, status, role, and address information requirements.
 /// </summary>
 public class UserValidatorTests
 {
@@ -29,6 +29,7 @@ public class UserValidatorTests
     /// - Phone (valid Brazilian format)
     /// - Status (Active/Suspended)
     /// - Role (Customer/Admin)
+    /// - Name and address information
     /// passes all validation rules without any errors.
     /// </summary>
     [Fact(DisplayName = "Valid user should pass all validation rules")]
@@ -202,5 +203,225 @@ public class UserValidatorTests
 
         // Assert
         result.ShouldHaveValidationErrorFor(x => x.Role);
+    }
+
+    /// <summary>
+    /// Tests that validation fails for invalid first name formats.
+    /// This test verifies that first names that are:
+    /// - Empty strings
+    /// - Less than 1 character
+    /// - Longer than 50 characters
+    /// fail validation with appropriate error messages.
+    /// </summary>
+    /// <param name="firstName">The invalid first name to test.</param>
+    [Theory(DisplayName = "Invalid first name formats should fail validation")]
+    [InlineData("")] // Empty
+    public void Given_InvalidFirstName_When_Validated_Then_ShouldHaveError(string firstName)
+    {
+        // Arrange
+        var user = UserTestData.GenerateValidUser();
+        user.FirstName = firstName;
+
+        // Act
+        var result = _validator.TestValidate(user);
+
+        // Assert
+        result.ShouldHaveValidationErrorFor(x => x.FirstName);
+    }
+
+    /// <summary>
+    /// Tests that validation fails for invalid last name formats.
+    /// This test verifies that last names that are:
+    /// - Empty strings
+    /// - Less than 1 character
+    /// - Longer than 50 characters
+    /// fail validation with appropriate error messages.
+    /// </summary>
+    /// <param name="lastName">The invalid last name to test.</param>
+    [Theory(DisplayName = "Invalid last name formats should fail validation")]
+    [InlineData("")] // Empty
+    public void Given_InvalidLastName_When_Validated_Then_ShouldHaveError(string lastName)
+    {
+        // Arrange
+        var user = UserTestData.GenerateValidUser();
+        user.LastName = lastName;
+
+        // Act
+        var result = _validator.TestValidate(user);
+
+        // Assert
+        result.ShouldHaveValidationErrorFor(x => x.LastName);
+    }
+
+    /// <summary>
+    /// Tests that validation fails for invalid city formats.
+    /// This test verifies that cities that are:
+    /// - Empty strings
+    /// - Longer than 100 characters
+    /// fail validation with appropriate error messages.
+    /// </summary>
+    /// <param name="city">The invalid city to test.</param>
+    [Theory(DisplayName = "Invalid city formats should fail validation")]
+    [InlineData("")] // Empty
+    public void Given_InvalidCity_When_Validated_Then_ShouldHaveError(string city)
+    {
+        // Arrange
+        var user = UserTestData.GenerateValidUser();
+        user.City = city;
+
+        // Act
+        var result = _validator.TestValidate(user);
+
+        // Assert
+        result.ShouldHaveValidationErrorFor(x => x.City);
+    }
+
+    /// <summary>
+    /// Tests that validation fails for invalid street formats.
+    /// This test verifies that streets that are:
+    /// - Empty strings
+    /// - Longer than 100 characters
+    /// fail validation with appropriate error messages.
+    /// </summary>
+    /// <param name="street">The invalid street to test.</param>
+    [Theory(DisplayName = "Invalid street formats should fail validation")]
+    [InlineData("")] // Empty
+    public void Given_InvalidStreet_When_Validated_Then_ShouldHaveError(string street)
+    {
+        // Arrange
+        var user = UserTestData.GenerateValidUser();
+        user.Street = street;
+
+        // Act
+        var result = _validator.TestValidate(user);
+
+        // Assert
+        result.ShouldHaveValidationErrorFor(x => x.Street);
+    }
+
+    /// <summary>
+    /// Tests that validation fails for invalid number values.
+    /// This test verifies that numbers that are:
+    /// - Zero or negative values
+    /// fail validation with appropriate error messages.
+    /// </summary>
+    /// <param name="number">The invalid number to test.</param>
+    [Theory(DisplayName = "Invalid number values should fail validation")]
+    [InlineData(0)] // Zero
+    [InlineData(-1)] // Negative
+    public void Given_InvalidNumber_When_Validated_Then_ShouldHaveError(int number)
+    {
+        // Arrange
+        var user = UserTestData.GenerateValidUser();
+        user.Number = number;
+
+        // Act
+        var result = _validator.TestValidate(user);
+
+        // Assert
+        result.ShouldHaveValidationErrorFor(x => x.Number);
+    }
+
+    /// <summary>
+    /// Tests that validation fails for invalid zipcode formats.
+    /// This test verifies that zipcodes that are:
+    /// - Empty strings
+    /// - Longer than 20 characters
+    /// fail validation with appropriate error messages.
+    /// </summary>
+    /// <param name="zipcode">The invalid zipcode to test.</param>
+    [Theory(DisplayName = "Invalid zipcode formats should fail validation")]
+    [InlineData("")] // Empty
+    public void Given_InvalidZipcode_When_Validated_Then_ShouldHaveError(string zipcode)
+    {
+        // Arrange
+        var user = UserTestData.GenerateValidUser();
+        user.Zipcode = zipcode;
+
+        // Act
+        var result = _validator.TestValidate(user);
+
+        // Assert
+        result.ShouldHaveValidationErrorFor(x => x.Zipcode);
+    }
+
+    /// <summary>
+    /// Tests that validation fails when latitude exceeds maximum length.
+    /// This test verifies that latitude values longer than 20 characters
+    /// fail validation with appropriate error messages.
+    /// </summary>
+    [Fact(DisplayName = "Latitude longer than maximum length should fail validation")]
+    public void Given_LatitudeLongerThanMaximum_When_Validated_Then_ShouldHaveError()
+    {
+        // Arrange
+        var user = UserTestData.GenerateValidUser();
+        user.Latitude = "123456789012345678901"; // 21 characters
+
+        // Act
+        var result = _validator.TestValidate(user);
+
+        // Assert
+        result.ShouldHaveValidationErrorFor(x => x.Latitude);
+    }
+
+    /// <summary>
+    /// Tests that validation fails when longitude exceeds maximum length.
+    /// This test verifies that longitude values longer than 20 characters
+    /// fail validation with appropriate error messages.
+    /// </summary>
+    [Fact(DisplayName = "Longitude longer than maximum length should fail validation")]
+    public void Given_LongitudeLongerThanMaximum_When_Validated_Then_ShouldHaveError()
+    {
+        // Arrange
+        var user = UserTestData.GenerateValidUser();
+        user.Longitude = "123456789012345678901"; // 21 characters
+
+        // Act
+        var result = _validator.TestValidate(user);
+
+        // Assert
+        result.ShouldHaveValidationErrorFor(x => x.Longitude);
+    }
+
+    /// <summary>
+    /// Tests that validation passes when coordinates are null (optional fields).
+    /// This test verifies that null latitude and longitude values
+    /// pass validation since they are optional fields.
+    /// </summary>
+    [Fact(DisplayName = "Null coordinates should pass validation")]
+    public void Given_NullCoordinates_When_Validated_Then_ShouldNotHaveErrors()
+    {
+        // Arrange
+        var user = UserTestData.GenerateValidUser();
+        user.Latitude = null;
+        user.Longitude = null;
+
+        // Act
+        var result = _validator.TestValidate(user);
+
+        // Assert
+        result.ShouldNotHaveValidationErrorFor(x => x.Latitude);
+        result.ShouldNotHaveValidationErrorFor(x => x.Longitude);
+    }
+
+    /// <summary>
+    /// Tests that validation passes when coordinates are valid.
+    /// This test verifies that valid latitude and longitude values
+    /// pass validation with appropriate length constraints.
+    /// </summary>
+    [Fact(DisplayName = "Valid coordinates should pass validation")]
+    public void Given_ValidCoordinates_When_Validated_Then_ShouldNotHaveErrors()
+    {
+        // Arrange
+        var user = UserTestData.GenerateValidUser();
+        user.Latitude = "-23.5505";
+        user.Longitude = "-46.6333";
+
+        // Act
+        var result = _validator.TestValidate(user);
+
+        // Assert
+        result.ShouldNotHaveValidationErrorFor(x => x.Latitude);
+        result.ShouldNotHaveValidationErrorFor(x => x.Longitude);
     }
 }
