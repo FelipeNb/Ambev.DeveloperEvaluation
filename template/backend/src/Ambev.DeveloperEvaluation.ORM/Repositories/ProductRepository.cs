@@ -89,6 +89,17 @@ public class ProductRepository : RepositoryBase<Product>, IProductRepository
             .ToListAsync();
     }
 
+    public async Task<bool> ProductExistsAsync(Guid prodProductId)
+    {
+        return await _context.Products
+            .AnyAsync(u => u.Id == prodProductId);
+    }
+
+    public async Task<decimal> GetPriceByIdAsync(Guid prodProductId)
+    {
+        return await _context.Products.AsNoTracking().Where(u => u.Id == prodProductId).Select(s => s.Price).FirstOrDefaultAsync();
+    }
+
     /// <summary>
     /// Deletes a product from the database
     /// </summary>

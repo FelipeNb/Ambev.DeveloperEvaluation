@@ -29,16 +29,18 @@ public class ProductsController : BaseController
 {
     private readonly IMediator _mediator;
     private readonly IMapper _mapper;
+    private readonly ILogger<ProductsController> _logger;
 
     /// <summary>
     /// Initializes a new instance of ProductsController
     /// </summary>
     /// <param name="mediator">The mediator instance</param>
     /// <param name="mapper">The AutoMapper instance</param>
-    public ProductsController(IMediator mediator, IMapper mapper)
+    public ProductsController(IMediator mediator, IMapper mapper, ILogger<ProductsController> logger)
     {
         _mediator = mediator;
         _mapper = mapper;
+        _logger = logger;
     }
     
     /// <summary>
@@ -53,28 +55,35 @@ public class ProductsController : BaseController
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetProduct([FromRoute] Guid id, CancellationToken cancellationToken)
     {
+        _logger.LogInformation("[GetProduct] Request received: id={Id}", id);
         var request = new GetProductRequest { Id = id };
         var validator = new GetProductRequestValidator();
         var validationResult = await validator.ValidateAsync(request, cancellationToken);
 
         if (!validationResult.IsValid)
         {
+            _logger.LogInformation("[GetProduct] Validation failed: {Errors}", validationResult.Errors);
             return BadRequest(validationResult.Errors);
         }
 
         var command = _mapper.Map<GetProductCommand>(request);
         try
         {
-            var response = await _mediator.Send(command, cancellationToken);
-            return Ok(_mapper.Map<GetProductResponse>(response));
+            _logger.LogInformation("[GetProduct] Sending command: {@Command}", command);
+            var result = await _mediator.Send(command, cancellationToken);
+            var response = _mapper.Map<GetProductResponse>(result);
+            _logger.LogInformation("[GetProduct] Success: id={Id}", id);
+            return Ok(response);
         }
         catch (KeyNotFoundException e)
         {
-            return NotFound(ApiResponse.BuildErrorResponse(e.Message));
+            _logger.LogInformation(e, "[GetProduct] NotFound: id={Id} message={Message}", id, e.Message);
+            return NotFound(ApiResponse.BuildErrorResponse("KeyNotFound", "Product not found", e.Message));
         }
         catch (InvalidOperationException e)
         {
-            return BadRequest(ApiResponse.BuildErrorResponse(e.Message));
+            _logger.LogInformation(e, "[GetProduct] InvalidOperation: id={Id} message={Message}", id, e.Message);
+            return BadRequest(ApiResponse.BuildErrorResponse("InvalidOperation", "", e.Message));
         }
     }
     
@@ -90,18 +99,25 @@ public class ProductsController : BaseController
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> ListProductCategories(CancellationToken cancellationToken)
     {
+        _logger.LogInformation("[ListProductCategories] Request received");
         try
         {
-            var response = await _mediator.Send(new ListProductCategoryCommand(), cancellationToken);
-            return Ok(_mapper.Map<ListProductCategoryResponse>(response).Categories);
+            var command = new ListProductCategoryCommand();
+            _logger.LogInformation("[ListProductCategories] Sending command: {@Command}", command);
+            var result = await _mediator.Send(command, cancellationToken);
+            var response = _mapper.Map<ListProductCategoryResponse>(result).Categories;
+            _logger.LogInformation("[ListProductCategories] Success count={Count}", response?.Count);
+            return Ok(response);
         }
         catch (KeyNotFoundException e)
         {
-            return NotFound(ApiResponse.BuildErrorResponse(e.Message));
+            _logger.LogInformation(e, "[ListProductCategories] NotFound: message={Message}", e.Message);
+            return NotFound(ApiResponse.BuildErrorResponse("KeyNotFound", "Product not found", e.Message));
         }
         catch (InvalidOperationException e)
         {
-            return BadRequest(ApiResponse.BuildErrorResponse(e.Message));
+            _logger.LogInformation(e, "[ListProductCategories] InvalidOperation: message={Message}", e.Message);
+            return BadRequest(ApiResponse.BuildErrorResponse("InvalidOperation", "", e.Message));
         }
     }
 
@@ -122,6 +138,20 @@ public class ProductsController : BaseController
         [FromQuery] string? _order = "price desc,title asc",
         CancellationToken cancellationToken = default)
     {
+        _logger.LogInformation("[GetProducts] Request received: page={Page} size={Size} order={Order}", _page, _size, _order);
+        var request = new ListProductsRequest
+        {
+            Page = _page,
+            Size = _size,
+        };
+        var validator = new ListProductsRequestValidator();
+        var validationResult = await validator.ValidateAsync(request, cancellationToken);
+        
+        if (!validationResult.IsValid)
+        {
+            _logger.LogInformation("[GetProducts] Validation failed: {Errors}", validationResult.Errors);
+            return BadRequest(validationResult.Errors);
+        }
         
         var command = new ListProductsCommand
         {
@@ -129,16 +159,21 @@ public class ProductsController : BaseController
             Size = _size,
             Order = _order
         };
+        
+        
 
         try
         {
-            // Executa a query via Mediator
+            _logger.LogInformation("[GetProducts] Sending command: {@Command}", command);
             var result = await _mediator.Send(command, cancellationToken);
-            return Ok(_mapper.Map<ListProductsResponse>(result));
+            var response = _mapper.Map<ListProductsResponse>(result);
+            _logger.LogInformation("[GetProducts] Success: count={Count}", response?.TotalItems);
+            return Ok(response);
         }
         catch (ValidationException e)
         {
-            return BadRequest(ApiResponse.BuildErrorResponse(e.Message));
+            _logger.LogInformation(e, "[GetProducts] ValidationException: message={Message}", e.Message);
+            return BadRequest(ApiResponse.BuildErrorResponse("InvalidOperation", "", e.Message));
         }
     }
 
@@ -153,12 +188,14 @@ public class ProductsController : BaseController
         [FromQuery] string? _order = "price desc,title asc",
         CancellationToken cancellationToken = default)
     {
+        _logger.LogInformation("[GetProductsByCategory] Request received: category={Category} page={Page} size={Size} order={Order}", category, _page, _size, _order);
         var request = new GetProductCategoryRequest() { Category = category };
         var validator = new GetProductCategoryRequestValidator();
         var validationResult = await validator.ValidateAsync(request, cancellationToken);
 
         if (!validationResult.IsValid)
         {
+            _logger.LogInformation("[GetProductsByCategory] Validation failed: {Errors}", validationResult.Errors);
             return BadRequest(validationResult.Errors);
         }
         
@@ -172,13 +209,21 @@ public class ProductsController : BaseController
 
         try
         {
-            // Executa a query via Mediator
+            _logger.LogInformation("[GetProductsByCategory] Sending command: {@Command}", command);
             var result = await _mediator.Send(command, cancellationToken);
-            return Ok(_mapper.Map<GetProductCategoryResponse>(result));
+            var response = _mapper.Map<GetProductCategoryResponse>(result);
+            _logger.LogInformation("[GetProductsByCategory] Success: category={Category}", category);
+            return Ok(response);
+        }
+        catch (KeyNotFoundException e)
+        {
+            _logger.LogInformation(e, "[GetProductsByCategory] NotFound: category={Category} message={Message}", category, e.Message);
+            return NotFound(ApiResponse.BuildErrorResponse("KeyNotFound", "Category not found", e.Message));
         }
         catch (ValidationException e)
         {
-            return BadRequest(ApiResponse.BuildErrorResponse(e.Message));
+            _logger.LogInformation(e, "[GetProductsByCategory] ValidationException: message={Message}", e.Message);
+            return BadRequest(ApiResponse.BuildErrorResponse("InvalidOperation", "", e.Message));
         }
     }
 
@@ -195,6 +240,7 @@ public class ProductsController : BaseController
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateProduct([FromBody] CreateProductRequest request, CancellationToken cancellationToken)
     {
+        _logger.LogInformation("[CreateProduct] Request received");
         var validator = new CreateProductRequestValidator();
         var validationResult = await validator.ValidateAsync(request, cancellationToken);
 
@@ -204,13 +250,16 @@ public class ProductsController : BaseController
         try
         {
             var command = _mapper.Map<CreateProductCommand>(request);
-            var response = await _mediator.Send(command, cancellationToken);
-
-            return Created(string.Empty, _mapper.Map<CreateProductResponse>(response));
+            _logger.LogInformation("[CreateProduct] Sending command: {@Command}", command);
+            var result = await _mediator.Send(command, cancellationToken);
+            var response = _mapper.Map<CreateProductResponse>(result);
+            _logger.LogInformation("[CreateProduct] Success");
+            return Created(string.Empty, response);
         }
         catch (InvalidOperationException e)
         {
-            return BadRequest(ApiResponse.BuildErrorResponse(e.Message));
+            _logger.LogInformation(e, "[CreateProduct] InvalidOperation: message={Message}", e.Message);
+            return BadRequest(ApiResponse.BuildErrorResponse("InvalidOperation", "Field already exists", e.Message));
         }
     }
     
@@ -227,6 +276,7 @@ public class ProductsController : BaseController
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteProduct([FromRoute] Guid id, CancellationToken cancellationToken)
     {
+        _logger.LogInformation("[DeleteProduct] Request received: id={Id}", id);
         var request = new DeleteProductRequest { Id = id };
         var validator = new DeleteProductRequestValidator();
         var validationResult = await validator.ValidateAsync(request, cancellationToken);
@@ -237,6 +287,7 @@ public class ProductsController : BaseController
         try
         {
             var command = _mapper.Map<DeleteProductCommand>(request.Id);
+            _logger.LogInformation("[DeleteProduct] Sending command: {@Command}", command);
             await _mediator.Send(command, cancellationToken);
 
             return Ok(new ApiResponse
@@ -247,11 +298,13 @@ public class ProductsController : BaseController
         }
         catch (KeyNotFoundException e)
         {
-            return NotFound(ApiResponse.BuildErrorResponse(e.Message));
+            _logger.LogInformation(e, "[DeleteProduct] NotFound: id={Id} message={Message}", id, e.Message);
+            return NotFound(ApiResponse.BuildErrorResponse("KeyNotFound", "Product not found", e.Message));
         }
         catch (InvalidOperationException e)
         {
-            return BadRequest(ApiResponse.BuildErrorResponse(e.Message));
+            _logger.LogInformation(e, "[DeleteProduct] InvalidOperation: id={Id} message={Message}", id, e.Message);
+            return BadRequest(ApiResponse.BuildErrorResponse("InvalidOperation", "", e.Message));
         }
     }
 
@@ -267,6 +320,7 @@ public class ProductsController : BaseController
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateProduct([FromRoute] Guid id, [FromBody] UpdateProductRequest request, CancellationToken cancellationToken)
     {
+        _logger.LogInformation("[UpdateProduct] Request received: id={Id}", id);
         request.Id = id;
         var validator = new UpdateProductRequestValidator();
         var validationResult = await validator.ValidateAsync(request, cancellationToken);
@@ -277,16 +331,21 @@ public class ProductsController : BaseController
         try
         {
             var command = _mapper.Map<UpdateProductCommand>(request);
-            var response = await _mediator.Send(command, cancellationToken);
-            return Ok(_mapper.Map<UpdateProductResponse>(response));
+            _logger.LogInformation("[UpdateProduct] Sending command: {@Command}", command);
+            var result = await _mediator.Send(command, cancellationToken);
+            var response = _mapper.Map<UpdateProductResponse>(result);
+            _logger.LogInformation("[UpdateProduct] Success: id={Id}", id);
+            return Ok(response);
         }
         catch (KeyNotFoundException e)
         {
-            return NotFound(ApiResponse.BuildErrorResponse(e.Message));
+            _logger.LogInformation(e, "[UpdateProduct] NotFound: id={Id} message={Message}", id, e.Message);
+            return NotFound(ApiResponse.BuildErrorResponse("KeyNotFound", "Product not found", e.Message));
         }
         catch (InvalidOperationException e)
         {
-            return BadRequest(ApiResponse.BuildErrorResponse(e.Message));
+            _logger.LogInformation(e, "[UpdateProduct] InvalidOperation: id={Id} message={Message}", id, e.Message);
+            return BadRequest(ApiResponse.BuildErrorResponse("InvalidOperation", "Field already exists",e.Message));
         }
     }
 

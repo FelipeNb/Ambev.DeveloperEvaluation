@@ -11,11 +11,7 @@ public class CreateProductRequestValidator : AbstractValidator<CreateProductRequ
 {
     public CreateProductRequestValidator()
     {
-        RuleFor(user => user.Title).NotEmpty().Length(3, 500);
-        RuleFor(user => user.Category).NotEmpty().Length(3, 100);
-        RuleFor(user => user.Price).NotEmpty().GreaterThan(0);
         
-        RuleFor(user => user.Description).Length(3, 50);
         RuleFor(user => user.Image).MaximumLength(500);
         
         RuleFor(user => user.Title)
