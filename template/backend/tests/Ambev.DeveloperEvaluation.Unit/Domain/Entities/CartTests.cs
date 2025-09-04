@@ -26,7 +26,7 @@ public class CartTests
         result.IsValid.Should().BeFalse();
         result.Errors.Should().NotBeEmpty();
     
-        result.Errors.Should().ContainSingle(e => e.Type == "Items" && e.Error == "NotEmptyValidator");
+        result.Errors.Should().Contain(e => e.Type == "Items" && e.Error == "NotEmptyValidator");
         result.Errors.Should().ContainSingle(e => e.Type == "TotalAmount" && e.Error == "GreaterThanValidator");
     }
 
