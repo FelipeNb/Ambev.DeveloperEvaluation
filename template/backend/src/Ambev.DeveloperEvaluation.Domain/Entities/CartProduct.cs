@@ -8,7 +8,7 @@ public class CartProduct : BaseEntity
     public Guid Id { get; set; }
     public Guid CartId { get; set; }
     public Guid ProductId { get; set; }
-    public string ProductName => Product.Title;
+    public string? ProductName => Product?.Title;
     public int Quantity { get; set; }
     
     public decimal UnitPrice { get; set; }
