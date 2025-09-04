@@ -9,6 +9,7 @@ public class Cart : BaseEntity
 {
     public Guid Id { get; set; }
     public Guid UserId { get; set; }
+    public string Username => $"{User.FirstName} {User.LastName}";
     public DateTime? Date { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }

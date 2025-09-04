@@ -113,7 +113,8 @@ public class CartRepository : RepositoryBase<Cart>, ICartRepository
     public override async Task<PagedResult<Cart>> GetAllAsync(int page, int size, string? order, CancellationToken ct)
     {
         var query = _context.Carts
-            .Include(s => s.Items)
+            .Include(s => s.User)
+            .Include(s => s.Items).ThenInclude(s => s.Product)
             .AsQueryable();
         
         query = ApplyOrdering(query, order);

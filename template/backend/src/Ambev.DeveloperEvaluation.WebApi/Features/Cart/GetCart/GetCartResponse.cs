@@ -9,6 +9,7 @@ public class GetCartResponse
 {
     public Guid Id { get; set; }
     public Guid UserId { get; set; }
+    public String Username { get; set; }
     public DateTime? Date { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
