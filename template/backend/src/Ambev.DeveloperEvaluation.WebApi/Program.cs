@@ -25,6 +25,15 @@ public class Program
             builder.AddDefaultLogging();
 
             builder.Services.AddControllers();
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll", policy =>
+                {
+                    policy.AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader();
+                });
+            });
             builder.Services.AddEndpointsApiExplorer();
 
             builder.AddBasicHealthChecks();
@@ -56,6 +65,8 @@ public class Program
             var app = builder.Build();
             app.UseMiddleware<ValidationExceptionMiddleware>();
 
+            app.UseCors("AllowAll");
+            
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
@@ -75,6 +86,8 @@ public class Program
             var context = scope.ServiceProvider.GetRequiredService<DefaultContext>();
             context.Database.Migrate();
             DataSeeder.Seed(context);
+            
+
             
             app.Run();
             

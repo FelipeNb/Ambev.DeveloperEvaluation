@@ -1,4 +1,5 @@
 using Ambev.DeveloperEvaluation.Application.Users.GetUser;
+using Ambev.DeveloperEvaluation.Domain.Entities;
 using AutoMapper;
 
 namespace Ambev.DeveloperEvaluation.WebApi.Features.Users.GetUser;
@@ -19,6 +20,7 @@ public class GetUserProfile : Profile
             .ConstructUsing(id => new GetUserCommand(id));
         
         // Do Result -> Response
+        CreateMap<User, GetUserResponse>();
         CreateMap<GetUserResult, GetUserResponse>()
             .ForMember(dest => dest.Name, opt => 
                 opt.MapFrom(src => new GetUserNameResponse
